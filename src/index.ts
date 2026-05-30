@@ -7,7 +7,10 @@ import path from 'path';
 
 dotenv.config();
 
+console.log('[startup] Variables d\'environnement chargées.');
+
 const port = process.env.PORT || 3000;
+console.log(`[startup] Démarrage du serveur sur le port ${port}...`);
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
@@ -19,6 +22,7 @@ function getTimestamp() {
 }
 
 function backupDatabase() {
+  console.log('[startup] Vérification de la sauvegarde MySQL...');
   const timestamp = getTimestamp();
   const backupDir = path.join(process.cwd(), 'database_backups');
   const backupPath = path.join(backupDir, `mysql_backup_${timestamp}.sql`);
@@ -38,15 +42,21 @@ function backupDatabase() {
     return;
   }
 
+  console.log(`[startup] Lancement du backup MySQL vers ${backupPath}`);
   const command = `mysqldump -h ${dbHost} -P ${dbPort} -u ${dbUser} -p'${dbPassword}' ${dbName} > ${backupPath}`;
 
   exec(command, error => {
     if (!error) {
       console.log('MySQL database backup created:', backupPath);
+      return;
     }
+
+    console.error('MySQL database backup failed.');
   });
 }
 
+console.log('[startup] Lancement du premier backup MySQL.');
 backupDatabase();
 
+console.log('[startup] Planification du backup MySQL toutes les heures.');
 setInterval(backupDatabase, 60 * 60 * 1000);

@@ -24,6 +24,7 @@ import './controllers/TradeController';
 import './controllers/UserController';
 import './controllers/WebAuthnController';
 
+console.log('[startup] Construction de l\'application Express...');
 const server = new InversifyExpressServer(container);
 
 server.setConfig(app => {
@@ -38,12 +39,17 @@ server.setConfig(app => {
   );
 });
 
+console.log('[startup] Middlewares principaux configurés.');
+
 server.setErrorConfig(app => {
   app.use((req, res) => {
     res.status(404).json({ message: 'Not Found' });
   });
 });
 
+console.log('[startup] Routeur et gestion des erreurs prêts.');
 export const app = server.build();
+
+console.log('[startup] Application Express construite.');
 
 
