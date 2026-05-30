@@ -9,6 +9,25 @@ This API provides endpoints for inventories, items, lobbies, trades, users, OAut
 
 Some endpoints require authentication via a token.
 
+## Database
+
+This project uses MySQL or MariaDB.
+
+Set one of the following environment configurations:
+
+- `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME`
+- Optional: `DB_PORT` if your server does not use `3306`
+
+Example:
+
+```env
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=root
+DB_PASS=secret
+DB_NAME=croissant
+```
+
 ## Endpoints
 
 ### Inventories

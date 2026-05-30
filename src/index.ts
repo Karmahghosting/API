@@ -31,13 +31,14 @@ function backupDatabase() {
   const dbPassword = process.env.DB_PASS;
   const dbName = process.env.DB_NAME;
   const dbHost = process.env.DB_HOST;
+  const dbPort = process.env.DB_PORT || '3306';
 
   if (!dbUser || !dbPassword || !dbName || !dbHost) {
     console.error('Missing database credentials in environment variables.');
     return;
   }
 
-  const command = `mysqldump -h ${dbHost} -u ${dbUser} -p'${dbPassword}' ${dbName} > ${backupPath}`;
+  const command = `mysqldump -h ${dbHost} -P ${dbPort} -u ${dbUser} -p'${dbPassword}' ${dbName} > ${backupPath}`;
 
   exec(command, error => {
     if (!error) {

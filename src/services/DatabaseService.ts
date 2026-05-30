@@ -15,14 +15,14 @@ export class DatabaseService implements IDatabaseService {
   private db: Knex;
 
   constructor() {
-    console.log(process.env.DB_HOST, process.env.DB_USER, process.env.DB_NAME);
+    const dbPort = Number(process.env.DB_PORT || 3306);
 
     this.db = knex({
       client: 'mysql',
       connection: {
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
-        port: 3306,
+        port: dbPort,
         password: process.env.DB_PASS,
         database: process.env.DB_NAME,
       },
