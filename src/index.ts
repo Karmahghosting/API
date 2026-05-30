@@ -45,13 +45,16 @@ function backupDatabase() {
   console.log(`[startup] Lancement du backup MySQL vers ${backupPath}`)
   const command = `mysqldump -h ${dbHost} -P ${dbPort} -u ${dbUser} -p'${dbPassword}' ${dbName} > ${backupPath}`
 
-  exec(command, (error) => {
+  exec(command, (error, _stdout, stderr) => {
     if (!error) {
       console.log('MySQL database backup created:', backupPath)
       return
     }
 
-    console.error('MySQL database backup failed.')
+    console.error(`[startup] MySQL database backup failed: ${error.message}`);
+    if (stderr?.trim()) {
+      console.error(stderr.trim());
+    }
   })
 }
 

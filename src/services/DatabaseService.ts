@@ -16,15 +16,20 @@ export class DatabaseService implements IDatabaseService {
 
   constructor() {
     const dbPort = Number(process.env.DB_PORT || 3306);
+    const dbHost = process.env.DB_HOST || 'localhost';
+    const dbUser = process.env.DB_USER || '';
+    const dbName = process.env.DB_NAME || '';
+
+    console.log(`[startup] Initialisation de la connexion MySQL vers ${dbHost}:${dbPort}${dbName ? ` (${dbName})` : ''}...`);
 
     this.db = knex({
       client: 'mysql',
       connection: {
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
+        host: dbHost,
+        user: dbUser,
         port: dbPort,
         password: process.env.DB_PASS,
-        database: process.env.DB_NAME,
+        database: dbName,
       },
       useNullAsDefault: true,
     });
@@ -32,10 +37,12 @@ export class DatabaseService implements IDatabaseService {
     this.db
       .raw('SELECT 1')
       .then(() => {
-        console.log('Database connection established');
+        console.log(`[startup] Connexion MySQL établie vers ${dbHost}:${dbPort}${dbName ? ` (${dbName})` : ''}.`);
       })
       .catch(err => {
-        console.error('Database connection error:', err);
+        const errorCode = typeof err === 'object' && err && 'code' in err ? String((err as { code?: unknown }).code ?? 'UNKNOWN') : 'UNKNOWN';
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.error(`[startup] Connexion MySQL impossible vers ${dbHost}:${dbPort}${dbName ? ` (${dbName})` : ''}: ${errorCode} - ${errorMessage}`);
       });
   }
 
