@@ -9,8 +9,8 @@ import { ILogService } from '../services/LogService';
 import { userIdParamSchema } from '../validators/InventoryValidator';
 
 function handleError(res: Response, error: unknown, message: string, status = 500) {
-  const msg = error instanceof Error ? error.message : String(error);
-  res.status(status).send({ message, error: msg });
+  console.error(message, error);
+  res.status(status).send({ message });
 }
 
 async function validateOr400(schema: Schema<unknown>, data: unknown, res: Response) {

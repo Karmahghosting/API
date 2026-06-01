@@ -14,8 +14,8 @@ import { IUserService } from '../services/UserService';
 import { createItemValidator, itemIdParamValidator, updateItemValidator } from '../validators/ItemValidator';
 
 function handleError(res: Response, error: unknown, message: string, status = 500) {
-  const msg = error instanceof Error ? error.message : String(error);
-  res.status(status).send({ message, error: msg });
+  console.error(message, error);
+  res.status(status).send({ message });
 }
 
 async function validateOr400(schema: Schema<unknown>, data: unknown, res: Response, message = 'Invalid data') {
@@ -423,7 +423,7 @@ export class Items {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       await this.createLog(req, 'inventory', 500, req.user?.user_id, { itemId, action: 'buy', amount, error: errorMsg });
-      res.status(500).send({ message: 'Error buying item', error: errorMsg });
+      res.status(500).send({ message: 'Error buying item' });
     }
   }
 
@@ -479,7 +479,7 @@ export class Items {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       await this.createLog(req, 'inventory', 500, req.user?.user_id, { itemId, action: 'sell', amount, purchasePrice, error: errorMsg });
-      res.status(500).send({ message: 'Error selling item', error: errorMsg });
+      res.status(500).send({ message: 'Error selling item' });
     }
   }
 
@@ -529,7 +529,7 @@ export class Items {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       await this.createLog(req, 'inventory', 500, req.user?.user_id, { itemId, action: 'consume', amount, uniqueId, userId, error: errorMsg });
-      res.status(500).send({ message: 'Error consuming item', error: errorMsg });
+      res.status(500).send({ message: 'Error consuming item' });
     }
   }
 
@@ -574,7 +574,7 @@ export class Items {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       await this.createLog(req, 'inventory', 500, req.user?.user_id, { itemId, action: 'drop', amount, uniqueId, error: errorMsg });
-      res.status(500).send({ message: 'Error dropping item', error: errorMsg });
+      res.status(500).send({ message: 'Error dropping item' });
     }
   }
 

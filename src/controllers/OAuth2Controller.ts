@@ -41,8 +41,8 @@ const authorizeRateLimit = rateLimit({
 });
 
 function handleError(res: Response, error: unknown, message: string, status = 500) {
-  const msg = error instanceof Error ? error.message : String(error);
-  res.status(status).send({ message, error: msg });
+  console.error(message, error);
+  res.status(status).send({ message });
 }
 
 @controller('/oauth2')
@@ -271,6 +271,15 @@ export class OAuth2 {
     }
 
     try {
+      const app = await this.oauth2Service.getAppByClientId(client_id);
+      if (!app) {
+        await this.createLog(req, 'oauth2_authorizations', 404, userId, { client_id, reason: 'unknown_client' });
+        return res.status(404).send({ message: 'Unknown client_id' });
+      }
+      if (!app.redirect_urls.includes(redirect_uri)) {
+        await this.createLog(req, 'oauth2_authorizations', 400, userId, { client_id, redirect_uri, reason: 'invalid_redirect_uri' });
+        return res.status(400).send({ message: 'Invalid redirect_uri' });
+      }
       const code = await this.oauth2Service.generateAuthCode(client_id, redirect_uri, userId);
       await this.createLog(req, 'oauth2_authorizations', 200, userId, {
         client_id,

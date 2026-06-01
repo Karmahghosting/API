@@ -77,7 +77,7 @@ export class SearchController {
         ...(admin && { admin_search: true }),
         error: msg,
       });
-      res.status(500).send({ message: 'Error searching', error: msg });
+      res.status(500).send({ message: 'Error searching' });
     }
   }
 
