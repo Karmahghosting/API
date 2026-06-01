@@ -47,7 +47,7 @@ export interface IUserService {
   getUserBySteamId(steamId: string): Promise<User | null>;
   generatePasswordResetToken(user_id: string): Promise<string>;
   updateWebauthnChallenge(user_id: string, challenge: string | null): Promise<void>;
-  addWebauthnCredential(userId: string, credential: { id: string; name: string; created_at: Date }): Promise<void>;
+  addWebauthnCredential(userId: string, credential: { id: string; publicKey?: string; counter?: number; transports?: string[]; name: string; created_at: Date }): Promise<void>;
   getUserByCredentialId(credentialId: string): Promise<User | null>;
   setAuthenticatorSecret(userId: string, secret: string | null): Promise<void>;
   getAuthenticatorSecret(userId: string): Promise<string | null>;
@@ -215,7 +215,7 @@ export class UserService implements IUserService {
     await this.userRepository.updateWebauthnChallenge(user_id, challenge);
   }
 
-  async addWebauthnCredential(userId: string, credential: { id: string; name: string; created_at: Date }): Promise<void> {
+  async addWebauthnCredential(userId: string, credential: { id: string; publicKey?: string; counter?: number; transports?: string[]; name: string; created_at: Date }): Promise<void> {
     const existing = await this.getUser(userId);
     if (!existing) {
       throw new Error('User not found');
@@ -223,6 +223,9 @@ export class UserService implements IUserService {
     const credentials = JSON.parse(existing.webauthn_credentials || '[]');
     credentials.push({
       id: credential.id,
+      publicKey: credential.publicKey,
+      counter: credential.counter,
+      transports: credential.transports,
       name: credential.name,
       created_at: credential.created_at,
     });

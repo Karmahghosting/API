@@ -2,7 +2,7 @@ import { WebAuthnCredential } from '@simplewebauthn/server/script/types';
 import { Request, Response } from 'express';
 import { inject } from 'inversify';
 import { controller, httpPost } from 'inversify-express-utils';
-import { getAuthenticationOptions, getRegistrationOptions, verifyRegistration } from '../lib/webauthnService';
+import { getAuthenticationOptions, getRegistrationOptions, verifyAuthentication, verifyRegistration } from '../lib/webauthnService';
 import { ILogService } from '../services/LogService';
 import { IUserService } from '../services/UserService';
 import { genKey } from '../utils/GenKey';
@@ -77,10 +77,14 @@ export class WebAuthn {
       const expectedChallengeBase64url = base64ToBase64url(expectedChallenge);
 
       const verification = await verifyRegistration({ credential }, expectedChallengeBase64url);
-      if (verification) {
-        await this.userService.updateWebauthnChallenge(credential.id, null);
+      if (verification?.verified && verification.registrationInfo) {
+        const info = verification.registrationInfo.credential;
+        await this.userService.updateWebauthnChallenge(userId, null);
         await this.userService.addWebauthnCredential(userId, {
-          id: credential.id,
+          id: info.id,
+          publicKey: Buffer.from(info.publicKey).toString('base64url'),
+          counter: info.counter,
+          transports: info.transports,
           name: credential.name || 'Default Name',
           created_at: new Date(),
         });
@@ -144,6 +148,20 @@ export class WebAuthn {
         await this.createLog(req, 'verifyAuthenticationHandler', 'users', 404, userId);
         return res.status(404).json({ message: 'User not found' });
       }
+
+      const expectedChallenge = user.webauthn_challenge;
+      if (!expectedChallenge) {
+        await this.createLog(req, 'verifyAuthenticationHandler', 'users', 400, user.user_id);
+        return res.status(400).json({ message: 'No challenge found' });
+      }
+      const expectedChallengeBase64url = expectedChallenge.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const credentials = JSON.parse(user.webauthn_credentials || '[]');
+      const verification = await verifyAuthentication({ credential }, expectedChallengeBase64url, credentials);
+      if (!verification?.verified) {
+        await this.createLog(req, 'verifyAuthenticationHandler', 'users', 401, user.user_id);
+        return res.status(401).json({ message: 'Authentication failed' });
+      }
+      await this.userService.updateWebauthnChallenge(user.user_id, null);
 
       const apiKey = genKey(user.user_id);
       const jwtToken = generateUserJwt(user, apiKey);

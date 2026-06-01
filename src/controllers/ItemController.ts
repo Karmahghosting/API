@@ -391,7 +391,7 @@ export class Items {
   public async buyItem(req: AuthenticatedRequest, res: Response) {
     const { itemId } = req.params;
     const { amount } = req.body;
-    if (!itemId || isNaN(amount)) {
+    if (!itemId || isNaN(amount) || !Number.isInteger(Number(amount)) || Number(amount) <= 0) {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_input', itemId, amount });
       return res.status(400).send({ message: 'Invalid input' });
     }
@@ -431,7 +431,7 @@ export class Items {
   public async sellItem(req: AuthenticatedRequest, res: Response) {
     const { itemId } = req.params;
     const { amount, purchasePrice, dataItemIndex } = req.body;
-    if (!itemId || isNaN(amount)) {
+    if (!itemId || isNaN(amount) || !Number.isInteger(Number(amount)) || Number(amount) <= 0) {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_input', itemId, amount });
       return res.status(400).send({ message: 'Invalid input' });
     }
@@ -495,7 +495,7 @@ export class Items {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_parameters', itemId, userId, has_amount: !!amount, has_uniqueId: !!uniqueId });
       return res.status(400).send({ message: "Invalid input: provide either 'amount' for items without metadata OR 'uniqueId' for items with metadata" });
     }
-    if (amount && isNaN(amount)) {
+    if (amount && (isNaN(amount) || !Number.isInteger(Number(amount)) || Number(amount) <= 0)) {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_amount', itemId, userId, amount });
       return res.status(400).send({ message: 'Invalid input: amount must be a number' });
     }
@@ -545,7 +545,7 @@ export class Items {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_parameters', itemId, has_amount: !!amount, has_uniqueId: !!uniqueId });
       return res.status(400).send({ message: "Invalid input: provide either 'amount' for items without metadata OR 'uniqueId' for items with metadata" });
     }
-    if (amount && isNaN(amount)) {
+    if (amount && (isNaN(amount) || !Number.isInteger(Number(amount)) || Number(amount) <= 0)) {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_amount', itemId, amount });
       return res.status(400).send({ message: 'Invalid input: amount must be a number' });
     }

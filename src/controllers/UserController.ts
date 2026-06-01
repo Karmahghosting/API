@@ -530,7 +530,7 @@ export class Users {
       return this.sendError(res, 404, 'Invalid reset token');
     }
     await this.createLog(req, 'isValidResetToken', 'users', 200, user.user_id);
-    res.status(200).send({ message: 'Valid reset token', user });
+    res.status(200).send({ message: 'Valid reset token', user: { username: user.username } });
   }
 
   @httpGet('/steam-redirect')
