@@ -14,8 +14,8 @@ import { IUserService } from '../services/UserService';
 import { createItemValidator, itemIdParamValidator, updateItemValidator } from '../validators/ItemValidator';
 
 function handleError(res: Response, error: unknown, message: string, status = 500) {
-  const msg = error instanceof Error ? error.message : String(error);
-  res.status(status).send({ message, error: msg });
+  console.error(message, error);
+  res.status(status).send({ message });
 }
 
 async function validateOr400(schema: Schema<unknown>, data: unknown, res: Response, message = 'Invalid data') {
@@ -391,7 +391,7 @@ export class Items {
   public async buyItem(req: AuthenticatedRequest, res: Response) {
     const { itemId } = req.params;
     const { amount } = req.body;
-    if (!itemId || isNaN(amount)) {
+    if (!itemId || isNaN(amount) || !Number.isInteger(Number(amount)) || Number(amount) <= 0) {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_input', itemId, amount });
       return res.status(400).send({ message: 'Invalid input' });
     }
@@ -423,7 +423,7 @@ export class Items {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       await this.createLog(req, 'inventory', 500, req.user?.user_id, { itemId, action: 'buy', amount, error: errorMsg });
-      res.status(500).send({ message: 'Error buying item', error: errorMsg });
+      res.status(500).send({ message: 'Error buying item' });
     }
   }
 
@@ -431,7 +431,7 @@ export class Items {
   public async sellItem(req: AuthenticatedRequest, res: Response) {
     const { itemId } = req.params;
     const { amount, purchasePrice, dataItemIndex } = req.body;
-    if (!itemId || isNaN(amount)) {
+    if (!itemId || isNaN(amount) || !Number.isInteger(Number(amount)) || Number(amount) <= 0) {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_input', itemId, amount });
       return res.status(400).send({ message: 'Invalid input' });
     }
@@ -479,7 +479,7 @@ export class Items {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       await this.createLog(req, 'inventory', 500, req.user?.user_id, { itemId, action: 'sell', amount, purchasePrice, error: errorMsg });
-      res.status(500).send({ message: 'Error selling item', error: errorMsg });
+      res.status(500).send({ message: 'Error selling item' });
     }
   }
 
@@ -495,7 +495,7 @@ export class Items {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_parameters', itemId, userId, has_amount: !!amount, has_uniqueId: !!uniqueId });
       return res.status(400).send({ message: "Invalid input: provide either 'amount' for items without metadata OR 'uniqueId' for items with metadata" });
     }
-    if (amount && isNaN(amount)) {
+    if (amount && (isNaN(amount) || !Number.isInteger(Number(amount)) || Number(amount) <= 0)) {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_amount', itemId, userId, amount });
       return res.status(400).send({ message: 'Invalid input: amount must be a number' });
     }
@@ -529,7 +529,7 @@ export class Items {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       await this.createLog(req, 'inventory', 500, req.user?.user_id, { itemId, action: 'consume', amount, uniqueId, userId, error: errorMsg });
-      res.status(500).send({ message: 'Error consuming item', error: errorMsg });
+      res.status(500).send({ message: 'Error consuming item' });
     }
   }
 
@@ -545,7 +545,7 @@ export class Items {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_parameters', itemId, has_amount: !!amount, has_uniqueId: !!uniqueId });
       return res.status(400).send({ message: "Invalid input: provide either 'amount' for items without metadata OR 'uniqueId' for items with metadata" });
     }
-    if (amount && isNaN(amount)) {
+    if (amount && (isNaN(amount) || !Number.isInteger(Number(amount)) || Number(amount) <= 0)) {
       await this.createLog(req, 'inventory', 400, req.user?.user_id, { reason: 'invalid_amount', itemId, amount });
       return res.status(400).send({ message: 'Invalid input: amount must be a number' });
     }
@@ -574,7 +574,7 @@ export class Items {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       await this.createLog(req, 'inventory', 500, req.user?.user_id, { itemId, action: 'drop', amount, uniqueId, error: errorMsg });
-      res.status(500).send({ message: 'Error dropping item', error: errorMsg });
+      res.status(500).send({ message: 'Error dropping item' });
     }
   }
 

@@ -11,8 +11,8 @@ import { ILogService } from '../services/LogService';
 import { lobbyIdParamSchema, userIdParamSchema } from '../validators/LobbyValidator';
 
 function handleError(res: Response, error: unknown, message: string, status = 500) {
-  const msg = error instanceof Error ? error.message : String(error);
-  res.status(status).send({ message, error: msg });
+  console.error(message, error);
+  res.status(status).send({ message });
 }
 
 async function validateOr400(schema: Schema<unknown>, data: unknown, res: Response) {
@@ -95,8 +95,8 @@ export class Lobbies {
       res.status(201).send({ message: 'Lobby created' });
     } catch (error) {
       await this.createLog(req, 'createLobby', 'lobbies', 500, req.user?.user_id);
-      const message = error instanceof Error ? error.message : String(error);
-      res.status(500).send({ message: 'Error creating lobby', error: message });
+      console.error('Error creating lobby', error);
+      res.status(500).send({ message: 'Error creating lobby' });
     }
   }
 

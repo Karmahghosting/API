@@ -57,8 +57,9 @@ export class Studios {
   }
 
   private async handleError(res: Response, req: Request, table: string, status: number, error: unknown, msg: string) {
+    console.error(msg, error);
     await this.createLog(req, table, status);
-    res.status(status).send({ message: msg, error: error instanceof Error ? error.message : String(error) });
+    res.status(status).send({ message: msg });
   }
 
   private async getStudioOrError(studioId: string, req: Request, res: Response) {

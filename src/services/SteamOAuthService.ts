@@ -2,7 +2,10 @@ import axios from 'axios';
 import { injectable } from 'inversify';
 import querystring from 'querystring';
 
-const STEAM_API_KEY = process.env.STEAM_API_KEY || 'BE084FB89CC0FF28AC790A9CC5D008A1';
+const STEAM_API_KEY = process.env.STEAM_API_KEY;
+if (!STEAM_API_KEY) {
+  throw new Error('STEAM_API_KEY is not set');
+}
 const STEAM_REALM = process.env.STEAM_REALM || 'http://localhost:8580/';
 const STEAM_RETURN_URL = process.env.STEAM_RETURN_URL || 'http://localhost:8580/api/users/steam-associate';
 
